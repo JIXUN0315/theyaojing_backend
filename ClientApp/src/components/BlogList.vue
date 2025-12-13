@@ -73,7 +73,7 @@
         >
           <div class="article-image">
             <img
-                :src="article.featuredImageUrl || '/placeholder-image.jpg'"
+                :src="article.coverImage || 'https://res.cloudinary.com/drmlihopq/image/upload/v1765616589/news/oca3vnj789e6nlnzfq7q.png'"
                 :alt="article.title"
                 @error="handleImageError"
             />
@@ -86,11 +86,10 @@
 
           <div class="article-content">
             <h3 class="article-title">{{ article.title }}</h3>
-            <p class="article-excerpt">{{ article.excerpt || '無摘要' }}</p>
 
             <div class="article-meta">
               <div class="meta-info">
-                <span class="date">{{ formatDate(article.createdAt) }}</span>
+                <span class="date">{{ formatDate(article.date) }}</span>
               </div>
 
               <div class="article-actions">

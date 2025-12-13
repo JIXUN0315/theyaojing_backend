@@ -34,19 +34,6 @@
           <div class="char-count">{{ article.title.length }}/200</div>
         </div>
 
-        <!-- 摘要 -->
-        <div class="form-group">
-          <label class="form-label">文章摘要</label>
-          <textarea
-              v-model="article.excerpt"
-              placeholder="輸入文章摘要，將顯示在列表和分享時..."
-              class="excerpt-input"
-              rows="3"
-              maxlength="300"
-          ></textarea>
-          <div class="char-count">{{ article.excerpt.length }}/300</div>
-        </div>
-
         <!-- 文章分類 -->
         <div class="form-group">
           <label class="form-label">文章分類 *</label>
@@ -223,9 +210,8 @@ const article = ref({
   title: '',
   slug: '',
   content: '',
-  excerpt: '',
   category: '',
-  featuredImageUrl: '',
+  coverImage: '321312321',
   isPublished: false,
   isFeatured: false,
 })
@@ -576,21 +562,6 @@ const selectCategory = (value) => {
   outline: none;
 }
 
-.excerpt-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  resize: vertical;
-  box-sizing: border-box;
-}
-
-.excerpt-input:focus {
-  outline: none;
-  border-color: #3182ce;
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-}
 
 .char-count {
   text-align: right;

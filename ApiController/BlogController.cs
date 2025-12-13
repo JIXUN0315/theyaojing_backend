@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Backend.Dto;
 using Backend.Repository;
+using Backend.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,8 +19,10 @@ public class BlogController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] BlogPostDto post)
+    public async Task<IActionResult> Create([FromBody] CreateBlogPostViewModel req)
     {
+
+        var post = new BlogPostDto(req);
         var id = await _repository.CreateAsync(post);
         return Ok(new { id });
     }
@@ -34,7 +38,7 @@ public class BlogController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(Guid id)
+    public async Task<IActionResult> Get(int id)
     {
         var post = await _repository.GetByIdAsync(id);
         if (post == null)
@@ -44,7 +48,7 @@ public class BlogController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] BlogPostDto post)
+    public async Task<IActionResult> Update(int id, [FromBody] BlogPostDto post)
     {
         post.Id = id;
         await _repository.UpdateAsync(post);
@@ -52,7 +56,7 @@ public class BlogController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(int id)
     {
         await _repository.DeleteAsync(id);
         return NoContent();

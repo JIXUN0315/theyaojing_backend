@@ -81,9 +81,7 @@
                 <span v-else class="status-badge draft">草稿</span>
               </div>
             </div>
-
-            <p class="news-excerpt">{{ news.excerpt || '無摘要' }}</p>
-
+            
             <div class="card-meta">
               <div class="meta-info">
                 <span class="publish-date">
@@ -184,7 +182,6 @@ const loadNews = async () => {
     // 後端沒有 excerpt & isPublished，所以前端這裡要補
     newsList.value = data.map(n => ({
       ...n,
-      excerpt: extractExcerpt(n.content),
       isPublished: n.isPublished,  // ← 用後端資料
       date: n.date,
       updating: false,

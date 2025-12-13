@@ -4,9 +4,9 @@ namespace Backend.Repository;
 
 public interface IBlogPostRepository
 {
-    Task<Guid> CreateAsync(BlogPostDto post);
+    Task<int> CreateAsync(BlogPostDto post);
     Task<List<BlogPostDto>> GetAllAsync();
-    Task<BlogPostDto?> GetByIdAsync(Guid id);
+    Task<BlogPostDto?> GetByIdAsync(int id);
     Task UpdateAsync(BlogPostDto post);
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(int id);
 }

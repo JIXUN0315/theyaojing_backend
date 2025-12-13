@@ -11,6 +11,7 @@
   "dependencies": {
     "@vuepic/vue-datepicker": "^12.1.0",
     "axios": "^1.13.2",
+    "chart.js": "^4.5.1",
     "suneditor": "^2.47.8",
     "sweetalert2": "^11.22.2",
     "vue": "^3.5.17",

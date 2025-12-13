@@ -12,7 +12,15 @@ public class FormListItemDto
     {
         get
         {
-            return JsonSerializer.Deserialize<AnswersDto>(this.answers);
+            try
+            {
+                return JsonSerializer.Deserialize<AnswersDto>(this.answers);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 
@@ -29,7 +37,15 @@ public class FormDetailDto
     {
         get
         {
-            return JsonSerializer.Deserialize<AnswersDto>(this.answers);
+            try
+            {
+                return JsonSerializer.Deserialize<AnswersDto>(this.answers);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
     public DateTime CreatedAt { get; set; }
@@ -75,7 +91,7 @@ public class AnswersDto
     /// <summary>
     /// 欲就讀的專業或領域（例如：人工智慧、行銷）
     /// </summary>
-    public string IntendedMajor { get; set; } 
+    public string[] IntendedMajor { get; set; } 
 
     /// <summary>
     /// 預計出發或入學的年份（例如：2026）
@@ -91,4 +107,9 @@ public class AnswersDto
     /// 其他補充說明（可空白，用來填寫特殊狀況或需求）
     /// </summary>
     public string OtherInfo { get; set; }
+    
+    /// <summary>
+    /// 想解決的問題
+    /// </summary>
+    public string[] QuestionToResolve { get; set; }
 }
