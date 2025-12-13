@@ -17,6 +17,7 @@ public class FormViewModel
         this.DepartYear = dto.AnswersDto.DepartYear;
         this.Referral = dto.AnswersDto.Referral;
         this.OtherInfo = dto.AnswersDto.OtherInfo;
+        this.CreatedAt = dto.CreatedAt;
 
     }
     
@@ -58,7 +59,7 @@ public class FormViewModel
     /// <summary>
     /// 欲就讀的專業或領域（例如：人工智慧、行銷）
     /// </summary>
-    public string IntendedMajor { get; set; } 
+    public string[] IntendedMajor { get; set; } 
 
     /// <summary>
     /// 預計出發或入學的年份（例如：2026）
@@ -74,4 +75,9 @@ public class FormViewModel
     /// 其他補充說明（可空白，用來填寫特殊狀況或需求）
     /// </summary>
     public string OtherInfo { get; set; } 
+    
+    /// <summary>
+    /// 新增時間
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
 }

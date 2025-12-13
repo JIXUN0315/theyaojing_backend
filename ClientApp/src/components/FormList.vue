@@ -11,7 +11,7 @@
       <div class="search-box">
         <input
             v-model="searchQuery"
-            type="text"
+            type="text"`
             placeholder="搜尋姓名或 Email..."
             class="search-input"
         />
