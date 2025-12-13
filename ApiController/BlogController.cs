@@ -19,6 +19,7 @@ public class BlogController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateBlogPostViewModel req)
     {
 
@@ -48,6 +49,8 @@ public class BlogController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize]
+
     public async Task<IActionResult> Update(int id, [FromBody] BlogPostDto post)
     {
         post.Id = id;
@@ -56,6 +59,8 @@ public class BlogController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
+
     public async Task<IActionResult> Delete(int id)
     {
         await _repository.DeleteAsync(id);

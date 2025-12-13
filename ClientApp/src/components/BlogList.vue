@@ -254,7 +254,7 @@ const formatDate = (dateString) => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = '/placeholder-image.jpg'
+  event.target.src = 'https://res.cloudinary.com/drmlihopq/image/upload/v1765616589/news/oca3vnj789e6nlnzfq7q.png'
 }
 
 // 當搜尋條件改變時重置到第一頁
