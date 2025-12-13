@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text.Json;
 using Backend.Dto;
 using Dapper;
 using Npgsql;
@@ -14,69 +15,104 @@ public class BlogPostRepository : IBlogPostRepository
         _db = db;
     }
 
-    public async Task<Guid> CreateAsync(BlogPostDto post)
+    public async Task<int> CreateAsync(BlogPostDto post)
     {
         const string sql = @"
-                INSERT INTO blog_posts (title, content, excerpt, featured_image_url, category, is_published)
-                VALUES (@Title, @Content, @Excerpt, @FeaturedImageUrl, @Category, @IsPublished)
-                RETURNING id;
-            ";
-        return await _db.ExecuteScalarAsync<Guid>(sql, post);
+        INSERT INTO blog_posts
+            (title, content, subtitle1, subtitle2, category, is_published, date, images, coverimage)
+        VALUES
+            (@Title, @Content, @Subtitle1, @Subtitle2, @Category, @IsPublished, @Date, @ImagesJson::jsonb, @CoverImage)
+        RETURNING id;
+    ";
+
+        return await _db.ExecuteScalarAsync<int>(sql, new
+        {
+            post.Title,
+            post.Content,
+            post.Subtitle1,
+            post.Subtitle2,
+            post.Category,
+            post.IsPublished,
+            post.Date,
+            post.CoverImage,
+            post.ImagesJson
+        });
     }
 
     public async Task<List<BlogPostDto>> GetAllAsync()
     {
         const string sql = @"
-            SELECT
-                id,
-                title,
-                content,
-                excerpt,
-                category,
-                is_published AS IsPublished,
-                featured_image_url AS FeaturedImageUrl,
-                created_at AS CreatedAt
-            FROM blog_posts
-            ORDER BY created_at DESC
-            LIMIT 30;
-        ";
+        SELECT
+            id,
+            title,
+            content,
+            subtitle1,
+            subtitle2,
+            category,
+            is_published AS IsPublished,
+            date AS Date,
+            images::text AS ImagesJson,
+            coverimage AS CoverImage
+        FROM blog_posts
+        ORDER BY date DESC;
+    ";
 
         var posts = await _db.QueryAsync<BlogPostDto>(sql);
         return posts.ToList();
     }
 
-    public async Task<BlogPostDto?> GetByIdAsync(Guid id)
+    public async Task<BlogPostDto?> GetByIdAsync(int id)
     {
         const string sql = @"
-            SELECT
-                id,
-                title,
-                content,
-                excerpt,
-                category,
-                is_published AS IsPublished,
-                featured_image_url AS FeaturedImageUrl,
-                created_at AS CreatedAt
-            FROM blog_posts WHERE id = @id";
+        SELECT
+            id,
+            title,
+            content,
+            subtitle1,
+            subtitle2,
+            category,
+            is_published AS IsPublished,
+            date AS Date,
+            images::text AS ImagesJson,
+            coverimage AS CoverImage
+        FROM blog_posts
+        WHERE id = @id;
+    ";
+
         return await _db.QueryFirstOrDefaultAsync<BlogPostDto>(sql, new { id });
     }
-
     public async Task UpdateAsync(BlogPostDto post)
     {
         const string sql = @"
-                UPDATE blog_posts SET
-                    title = @Title,
-                    content = @Content,
-                    excerpt = @Excerpt,
-                    featured_image_url = @FeaturedImageUrl,
-                    category = @Category,
-                    is_published = @IsPublished
-                WHERE id = @Id;
-            ";
-        await _db.ExecuteAsync(sql, post);
+        UPDATE blog_posts SET
+            title = @Title,
+            content = @Content,
+            subtitle1 = @Subtitle1,
+            subtitle2 = @Subtitle2,
+            category = @Category,
+            is_published = @IsPublished,
+            coverimage= @CoverImage,
+            date = @Date,
+            images = @Images::jsonb
+        WHERE id = @Id;
+    ";
+
+        await _db.ExecuteAsync(sql, new
+        {
+            post.Id,
+            post.Title,
+            post.Content,
+            post.Subtitle1,
+            post.Subtitle2,
+            post.Category,
+            post.IsPublished,
+            post.Date,
+            post.CoverImage,
+            Images = JsonSerializer.Serialize(post.Images)
+        });
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(int id)
     {
         const string sql = "DELETE FROM blog_posts WHERE id = @id";
         await _db.ExecuteAsync(sql, new { id });
