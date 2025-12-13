@@ -12,11 +12,11 @@
         <button
           @click="edit(false)"
           class="save-draft-btn"
-          :disabled="isSaving"
+          :disabled="isSaving || !canSave"
         >
           💾 {{ isSaving ? "儲存中..." : "儲存草稿" }}
         </button>
-        <button @click="edit(true)" class="publish-btn" :disabled="isSaving">
+        <button @click="edit(true)" class="publish-btn" :disabled="isSaving || !canSave">
           📢 {{ isSaving ? "發布中..." : "立即發布" }}
         </button>
       </div>
@@ -112,7 +112,14 @@ const news = ref({
 
 const editorRef = ref(null);
 let sunEditorInstance = null;
-
+const canSave = computed(() => {
+  return (
+    news.value.title.trim() !== "" &&
+    news.value.content.trim() !== "" &&
+    news.value.imgUrl.trim() !== "" &&
+    news.value.date !== ""
+  );
+});
 onMounted(async () => {
   // 先初始化 editor（一定要傳 plugins，fontSize 才存在）
   sunEditorInstance = suneditor.create(editorRef.value, {
@@ -232,6 +239,8 @@ const edit = async (isPublished) => {
     await createNews(isPublished);
   }
   isSaving.value = false;
+  alert('編輯完成!')
+  router.push("/dashboard/news");
 };
 const createNews = async (isPublished) => {
   await apiPost("/api/news/create", {
