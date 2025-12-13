@@ -73,7 +73,7 @@
         >
           <div class="article-image">
             <img
-                :src="article.images[0]?.url || 'https://res.cloudinary.com/drmlihopq/image/upload/v1765616589/news/oca3vnj789e6nlnzfq7q.png'"
+                :src="article.coverImage || 'https://res.cloudinary.com/drmlihopq/image/upload/v1765616589/news/oca3vnj789e6nlnzfq7q.png'"
                 :alt="article.title"
                 @error="handleImageError"
             />
