@@ -73,10 +73,14 @@ onMounted(() => {
 })
 
 const handleLogout = () => {
-  // 清除使用者資訊
-  localStorage.removeItem('adminUser')
-  // 導向登入頁面
-  router.push('/')
+  // 1️⃣ 清除 reactive 狀態（最重要）
+  user.value = null
+
+  // 2️⃣ 清除 localStorage
+  localStorage.removeItem('authToken')
+
+  // 3️⃣ 導向登入頁
+  router.replace('/') // 比 push 好
 }
 </script>
 

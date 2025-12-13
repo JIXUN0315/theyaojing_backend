@@ -78,5 +78,11 @@ namespace Backend.ApiController {
             var success = await _repo.DeleteAsync(id);
             return success ? Ok() : NotFound();
         }
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetLatest() {
+            var list = await _repo.GetAllAsync();
+            list = list.Where(x => x.IsPublished).OrderByDescending(x => x.Date).Take(4).ToList();
+            return Ok(list);
+        }
     }
 }
