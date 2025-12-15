@@ -2,6 +2,7 @@ using System.Data;
 using System.Text.Json;
 using Backend.Dto;
 using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 
 namespace Backend.Repository;
@@ -19,9 +20,9 @@ public class BlogPostRepository : IBlogPostRepository
     {
         const string sql = @"
         INSERT INTO blog_posts
-            (title, content, subtitle1, subtitle2, category, is_published, date, images, coverimage)
+            (title, content, subtitle1, subtitle2, category, is_published, date, images, coverimage, is_featured)
         VALUES
-            (@Title, @Content, @Subtitle1, @Subtitle2, @Category, @IsPublished, @Date, @ImagesJson::jsonb, @CoverImage)
+            (@Title, @Content, @Subtitle1, @Subtitle2, @Category, @IsPublished, @Date, @ImagesJson::jsonb, @CoverImage, @IsFeatured)
         RETURNING id;
     ";
 
@@ -35,6 +36,7 @@ public class BlogPostRepository : IBlogPostRepository
             post.IsPublished,
             post.Date,
             post.CoverImage,
+            post.IsFeatured,
             post.ImagesJson
         });
     }
@@ -52,7 +54,8 @@ public class BlogPostRepository : IBlogPostRepository
             is_published AS IsPublished,
             date AS Date,
             images::text AS ImagesJson,
-            coverimage AS CoverImage
+            coverimage AS CoverImage,
+            is_featured AS IsFeatured
         FROM blog_posts
         ORDER BY date DESC;
     ";
@@ -74,7 +77,8 @@ public class BlogPostRepository : IBlogPostRepository
             is_published AS IsPublished,
             date AS Date,
             images::text AS ImagesJson,
-            coverimage AS CoverImage
+            coverimage AS CoverImage,
+            is_featured AS IsFeatured
         FROM blog_posts
         WHERE id = @id;
     ";
@@ -93,6 +97,7 @@ public class BlogPostRepository : IBlogPostRepository
             is_published = @IsPublished,
             coverimage= @CoverImage,
             date = @Date,
+            is_featured = @IsFeatured,
             images = @Images::jsonb
         WHERE id = @Id;
     ";
@@ -108,6 +113,7 @@ public class BlogPostRepository : IBlogPostRepository
             post.IsPublished,
             post.Date,
             post.CoverImage,
+            post.IsFeatured,
             Images = JsonSerializer.Serialize(post.Images)
         });
     }
@@ -116,5 +122,21 @@ public class BlogPostRepository : IBlogPostRepository
     {
         const string sql = "DELETE FROM blog_posts WHERE id = @id";
         await _db.ExecuteAsync(sql, new { id });
+    }
+
+    public async Task<bool> UpdatePublishStatusAsync(int id, bool isPublished) {
+        var sql = @"
+                UPDATE blog_posts
+                SET
+                    is_published = @IsPublished
+                WHERE id = @Id
+            ";
+
+        var rows = await _db.ExecuteAsync(sql, new {
+            Id = id,
+            IsPublished = isPublished
+        });
+
+        return rows > 0;
     }
 }

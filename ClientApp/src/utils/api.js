@@ -28,8 +28,8 @@ api.interceptors.response.use(
       localStorage.removeItem("authToken")
       localStorage.removeItem("adminUser")
 
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login"
+      if (window.location.pathname !== "/") {
+        window.location.href = "/"
       }
     }
 

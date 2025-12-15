@@ -23,6 +23,7 @@ public class BlogPostDto
         this.Date = vm.Date;
         this.CoverImage = vm.CoverImage;
         this.ImagesJson = JsonSerializer.Serialize(vm.GetImagesOrDefault());
+        this.IsFeatured = false;
     }
     
     public int Id { get; set; }                 
@@ -34,7 +35,7 @@ public class BlogPostDto
 
     public string Category { get; set; } = string.Empty;
     public bool IsPublished { get; set; }
-
+    public bool IsFeatured { get; set; }
     public DateTime Date { get; set; }
 
     public string ImagesJson { get; set; } = "[]";

@@ -6,14 +6,18 @@
         <router-link to="/dashboard/blog" class="back-link">
           ← 返回部落格列表
         </router-link>
-        <h2 class="page-title">{{ isEditing ? '編輯文章' : '新增文章' }}</h2>
+        <h2 class="page-title">{{ isEditing ? "編輯文章" : "新增文章" }}</h2>
       </div>
       <div class="header-actions">
         <button @click="saveDraft" class="save-draft-btn" :disabled="isSaving">
-          💾 {{ isSaving ? '儲存中...' : '儲存草稿' }}
+          💾 {{ isSaving ? "儲存中..." : "儲存草稿" }}
         </button>
-        <button @click="publishArticle" class="publish-btn" :disabled="isSaving">
-          🚀 {{ isSaving ? '發布中...' : '發布文章' }}
+        <button
+          @click="publishArticle"
+          class="publish-btn"
+          :disabled="isSaving"
+        >
+          🚀 {{ isSaving ? "發布中..." : "發布文章" }}
         </button>
       </div>
     </div>
@@ -25,385 +29,460 @@
         <div class="form-group">
           <label class="form-label">文章標題 *</label>
           <input
-              v-model="article.title"
-              type="text"
-              placeholder="輸入文章標題..."
-              class="title-input"
-              maxlength="200"
+            v-model="article.title"
+            type="text"
+            placeholder="輸入文章標題..."
+            class="title-input"
+            maxlength="50"
           />
-          <div class="char-count">{{ article.title.length }}/200</div>
+          <div class="char-count">{{ article.title.length }}/100</div>
         </div>
+        <div class="form-group">
+          <label class="form-label">學校/副標題1</label>
+          <input
+            v-model="article.subtitle1"
+            type="text"
+            placeholder="輸入學校/副標題..."
+            class="title-input"
+            maxlength="50"
+          />
+          <div class="char-count">{{ article.subtitle1.length }}/100</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">學位學程/副標題2</label>
+          <input
+            v-model="article.subtitle2"
+            type="text"
+            placeholder="輸入學位學程/副標題..."
+            class="title-input"
+            maxlength="50"
+          />
+          <div class="char-count">{{ article.subtitle2.length }}/100</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">發布時間 *</label>
 
+          <VueDatePicker
+            v-model="article.date"
+            :time-config="{ enableTimePicker: false }"
+            :formats="{ input: 'yyyy-MM-dd' }"
+            :day-names="['日', '一', '二', '三', '四', '五', '六']"
+            placeholder="請選擇日期"
+            :clearable="false"
+            :auto-apply="true"
+          />
+        </div>
         <!-- 文章分類 -->
         <div class="form-group">
           <label class="form-label">文章分類 *</label>
-          <div class="custom-select" :class="{ open: categoryDropdownOpen }">
-            <div
-                class="select-trigger"
-                @click="toggleCategoryDropdown"
-                :class="{ 'has-value': article.category }"
-            >
-              <span class="select-value">
-                {{ article.category ? getCategoryText(article.category) : '請選擇文章分類' }}
-              </span>
-              <div class="select-arrow">
-                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-            </div>
-            <div class="select-dropdown" v-show="categoryDropdownOpen">
-              <div
-                  class="select-option"
-                  v-for="option in categoryOptions"
-                  :key="option.value"
-                  @click="selectCategory(option.value)"
-                  :class="{ active: article.category === option.value }"
-              >
-                <span class="option-icon">{{ option.icon }}</span>
-                <span class="option-text">{{ option.label }}</span>
-                <span v-if="article.category === option.value" class="option-check">✓</span>
-              </div>
-            </div>
-          </div>
-          <div class="form-hint">選擇最符合文章內容的分類</div>
-        </div>
 
+          <div class="radio-group">
+            <!-- 既有分類 -->
+            <label
+              class="radio-option"
+              v-for="option in categoryOptions"
+              :key="option"
+            >
+              <input
+                type="radio"
+                name="category"
+                :value="option"
+                v-model="selectedCategory"
+              />
+              <span class="radio-label">{{ option }}</span>
+            </label>
+
+            <!-- 自訂分類 -->
+            <label class="radio-option">
+              <input
+                type="radio"
+                name="category"
+                value="__custom__"
+                v-model="selectedCategory"
+              />
+              <span class="radio-label">自行輸入</span>
+            </label>
+          </div>
+
+          <!-- 自訂輸入框 -->
+          <div
+            class="custom-category-input"
+            v-if="selectedCategory === '__custom__'"
+          >
+            <span class="hash-prefix">#</span>
+            <input
+              v-model="customCategory"
+              type="text"
+              placeholder="請輸入分類名稱"
+              class="title-input"
+              maxlength="200"
+            />
+          </div>
+
+          <div class="form-hint">選擇或輸入最符合文章內容的分類</div>
+        </div>
+        <!-- 精選分享 -->
+        <div class="form-group">
+          <label class="form-label">精選分享</label>
+
+          <label class="checkbox-option">
+            <input type="checkbox" v-model="article.isFeatured" />
+            <span class="checkbox-label">設為精選分享</span>
+          </label>
+
+          <div class="form-hint">
+            勾選後，文章會顯示於首頁「學生回饋精選」區塊
+          </div>
+        </div>
         <!-- 特色圖片 -->
         <div class="form-group">
-          <label class="form-label">特色圖片</label>
+          <label class="form-label">封面圖片 *</label>
           <div class="image-upload">
-            <div v-if="article.featuredImageUrl" class="image-preview">
-              <img :src="article.featuredImageUrl" alt="特色圖片預覽" />
+            <div v-if="article.coverImage" class="image-preview">
+              <img :src="article.coverImage" alt="特色圖片預覽" />
               <button @click="removeImage" class="remove-image-btn">✕</button>
             </div>
             <div v-else class="image-placeholder">
               <input
-                  ref="imageInput"
-                  type="file"
-                  accept="image/*"
-                  @change="handleImageUpload"
-                  class="image-input"
+                ref="imageInput"
+                type="file"
+                accept="image/*"
+                @change="handleImageUpload"
+                class="image-input"
               />
               <div class="upload-area" @click="$refs.imageInput.click()">
                 <div class="upload-icon">📷</div>
-                <p>點擊上傳圖片或輸入圖片網址</p>
               </div>
             </div>
-            <input
-                v-model="article.featuredImageUrl"
-                type="url"
-                placeholder="或輸入圖片網址..."
-                class="image-url-input"
-            />
           </div>
         </div>
+        <!-- 文章圖片（多張） -->
+        <div class="form-group">
+          <label class="form-label">文章圖片（可上傳多張）</label>
 
-        <!-- 文字編輯器 -->
+          <div class="multi-image-upload">
+            <!-- 已上傳圖片預覽 -->
+            <div
+              class="multi-image-preview"
+              v-for="(img, index) in article.images"
+              :key="index"
+            >
+              <img :src="img.url" alt="文章圖片預覽" />
+              <button
+                class="remove-image-btn"
+                @click="removeContentImage(index)"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- 上傳按鈕 -->
+            <div class="image-placeholder">
+              <input
+                ref="contentImageInput"
+                type="file"
+                accept="image/*"
+                multiple
+                @change="handleContentImagesUpload"
+                class="image-input"
+              />
+              <div class="upload-area" @click="$refs.contentImageInput.click()">
+                <div class="upload-icon">➕</div>
+                <div class="upload-text">新增圖片</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-hint">圖片將依上傳順序顯示於文章中</div>
+        </div>
+
+        <!-- 內容編輯器 -->
         <div class="form-group">
           <label class="form-label">文章內容 *</label>
-          <div class="editor-wrapper">
-            <div class="editor-toolbar">
-              <div class="toolbar-group">
-                <button @click="execCommand('bold')" class="toolbar-btn" title="粗體">
-                  <strong>B</strong>
-                </button>
-                <button @click="execCommand('italic')" class="toolbar-btn" title="斜體">
-                  <em>I</em>
-                </button>
-                <button @click="execCommand('underline')" class="toolbar-btn" title="底線">
-                  <u>U</u>
-                </button>
-              </div>
-
-              <div class="toolbar-group">
-                <select @change="execCommand('formatBlock', $event.target.value)" class="format-select">
-                  <option value="">格式</option>
-                  <option value="h1">標題 1</option>
-                  <option value="h2">標題 2</option>
-                  <option value="h3">標題 3</option>
-                  <option value="p">段落</option>
-                </select>
-              </div>
-
-              <div class="toolbar-group">
-                <button @click="execCommand('insertUnorderedList')" class="toolbar-btn" title="項目符號">
-                  •
-                </button>
-                <button @click="execCommand('insertOrderedList')" class="toolbar-btn" title="編號">
-                  1.
-                </button>
-              </div>
-              
-
-              <div class="toolbar-group">
-                <button @click="toggleHtmlMode" class="toolbar-btn" :class="{ active: showHtml }" title="HTML 模式">
-                  &lt;/&gt;
-                </button>
-              </div>
-            </div>
-
-            <div v-if="!showHtml" class="editor-content">
-              <div
-                  ref="editor"
-                  class="rich-editor"
-                  contenteditable="true"
-                  @input="updateContent"
-                  @paste="handlePaste"
-              />
-            </div>
-
-            <div v-else class="html-editor">
-              <textarea
-                  v-model="article.content"
-                  class="html-textarea"
-                  placeholder="輸入 HTML 內容..."
-              ></textarea>
-            </div>
+          <div class="form-group">
+            <div ref="editorRef"></div>
           </div>
         </div>
-      </div>
-
-      <!-- 側邊欄設定 -->
-      <div class="editor-sidebar">
-        <div class="sidebar-section">
-          <h3 class="sidebar-title">統計資訊</h3>
-          <div class="stats-info">
-            <div class="stat-item">
-              <span class="stat-label">字數統計</span>
-              <span class="stat-value">{{ wordCount }}</span>
-            </div>
-          </div>
-        </div>
-        
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {apiGet, apiPost, apiPut} from '../utils/api.js'
-import { uploadImageToCloudinary } from '../utils/cloudinary.js'
-import Swal from 'sweetalert2'
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { apiGet, apiPost, apiPut } from "../utils/api.js";
+import { uploadImageToCloudinary } from "../utils/cloudinary.js";
+import Swal from "sweetalert2";
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+import suneditor from "suneditor";
+import plugins from "suneditor/src/plugins";
+import "suneditor/dist/css/suneditor.min.css";
+import dayjs from "dayjs";
+const route = useRoute();
+const router = useRouter();
 
-
-const route = useRoute()
-const router = useRouter()
-
-const isEditing = computed(() => route.params.id !== undefined)
-const isSaving = ref(false)
-const isDeleting = ref(false)
-const showHtml = ref(false)
-const categoryDropdownOpen = ref(false)
-
-const categoryOptions = [
-  { value: 'things-to-know', label: '留學後才知道的事', icon: '📚' },
-  { value: 'how-i-changed', label: '留學後的我變了', icon: '🌟' },
-  { value: 'career-sharing', label: '國外職業分享', icon: '💼' },
-  { value: 'comfort-zone', label: '勇敢跳出舒適圈：以前的我 vs 現在的我', icon: '🚀' },
-  { value: 'student-choice', label: '學生自選主題', icon: '✨' }
-]
+const isEditing = computed(() => route.params.id !== undefined);
+const isSaving = ref(false);
+const isDeleting = ref(false);
+const showHtml = ref(false);
+const categoryDropdownOpen = ref(false);
+// radio 選到的值
+const selectedCategory = ref("");
+const editorRef = ref(null);
+// 自訂分類（不含 #）
+const customCategory = ref("");
+const categoryOptions = ["#留學故事", "#服務心得", "#實用專欄"];
 
 const article = ref({
-  title: '',
-  slug: '',
-  content: '',
-  category: '',
-  coverImage: '321312321',
+  id: null,
+  title: "",
+  subtitle1: "",
+  subtitle2: "",
+  content: "",
+  category: "",
+  coverImage: "", // 對應後端 CoverImage
+  images: [], // 對應後端 Images
   isPublished: false,
   isFeatured: false,
-})
+  date: dayjs().hour(12).toDate(),
+  slug: "",
+});
 
-const editor = ref(null)
-const imageInput = ref(null)
-
+const editor = ref(null);
+let sunEditorInstance = null;
 onMounted(async () => {
+  sunEditorInstance = suneditor.create(editorRef.value, {
+    plugins, // ✅ 這行是解決 callPlugin.fail 的關鍵
+    showPathLabel: false,
+    width: "100%",
+    height: "400px",
+    defaultStyle:
+      "font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial; font-size: 16px; line-height: 1.7;",
+
+    font: [
+      "Noto Sans TC", // ✅ 正確（Web）
+      "Microsoft JhengHei",
+      "Arial",
+      "Tahoma",
+      "Verdana",
+    ],
+    fontSize: [12, 14, 16, 18, 20, 24, 28, 32],
+    formats: ["p", "div", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6"],
+    buttonList: [
+      ["undo", "redo"],
+      ["font", "fontSize", "formatBlock"],
+      ["bold", "underline", "italic", "strike"],
+      ["fontColor", "hiliteColor"],
+      ["align", "list", "lineHeight"],
+      ["link"],
+      ["removeFormat"],
+    ],
+  });
+
+  // 初始內容
+  sunEditorInstance.setContents(article.value.content || "");
+
+  // 同步內容回 Vue state
+  sunEditorInstance.onChange = (content) => {
+    article.value.content = content;
+  };
   if (isEditing.value) {
-    await loadArticle()
+    await loadArticle();
+    sunEditorInstance.setContents(article.value.content || "");
+    const matched = categoryOptions.includes(article.category);
+    if (matched) {
+      selectedCategory.value = article.category;
+    } else {
+      selectedCategory.value = "__custom__";
+      customCategory.value = article.category.replace(/^#/, "");
+    }
   }
 
   if (editor.value) {
-    editor.value.innerHTML = article.value.content || ''
+    editor.value.innerHTML = article.value.content || "";
   }
-  
 
   // 添加點擊外部關閉下拉選單的事件監聽
   const handleClickOutside = (e) => {
-    if (!e.target.closest('.custom-select')) {
-      categoryDropdownOpen.value = false
+    if (!e.target.closest(".custom-select")) {
+      categoryDropdownOpen.value = false;
     }
+  };
+  document.addEventListener("click", handleClickOutside);
+});
+// 同步回 article.category（關鍵）
+watch([selectedCategory, customCategory], () => {
+  if (selectedCategory.value === "__custom__") {
+    article.category = customCategory.value ? `#${customCategory.value}` : "";
+  } else {
+    article.category = selectedCategory.value;
   }
-  document.addEventListener('click', handleClickOutside)
-})
-
-
+});
 const loadArticle = async () => {
   try {
-    article.value = await apiGet(`/api/Blog/${route.params.id}`)
-  
+    const data = await apiGet(`/api/Blog/${route.params.id}`);
+
+    article.value = {
+      id: data.id,
+      title: data.title ?? "",
+      subtitle1: data.subtitle1 ?? "",
+      subtitle2: data.subtitle2 ?? "",
+      content: data.content ?? "",
+      category: data.category ?? "",
+      coverImage: data.coverImage ?? "",
+      images: data.images ?? [],
+      isPublished: data.isPublished ?? false,
+      isFeatured: data.isFeatured ?? false,
+      date: data.date ? new Date(data.date) : new Date(),
+      slug: data.slug ?? "",
+    };
+
+    // ⭐ 分類同步到 radio
+    const matched = categoryOptions.includes(article.value.category);
+    if (matched) {
+      selectedCategory.value = article.value.category;
+      customCategory.value = "";
+    } else {
+      selectedCategory.value = "__custom__";
+      customCategory.value = article.value.category.replace(/^#/, "");
+    }
+
+    // ⭐ SunEditor 內容
+    sunEditorInstance.setContents(article.value.content || "");
   } catch (error) {
-    console.error('Failed to load article:', error)
+    console.error("Failed to load article:", error);
+    await Swal.fire("載入失敗", "無法取得文章資料", "error");
   }
-}
-
-const wordCount = computed(() => {
-  const text = article.value.content.replace(/<[^>]*>/g, '')
-  return text.length
-})
-
-const updateContent = () => {
-  if (editor.value) {
-    article.value.content = editor.value.innerHTML
-  }
-}
-
-const execCommand = (command, value = null) => {
-  document.execCommand(command, false, value)
-  updateContent()
-}
-
-const insertLink = () => {
-  const url = prompt('請輸入連結網址:')
-  if (url) {
-    execCommand('createLink', url)
-  }
-}
-
-const insertImage = () => {
-  const url = prompt('請輸入圖片網址:')
-  if (url) {
-    execCommand('insertImage', url)
-  }
-}
-
-const toggleHtmlMode = () => {
-  showHtml.value = !showHtml.value
-}
-
-const handlePaste = (event) => {
-  event.preventDefault()
-  const text = event.clipboardData.getData('text/plain')
-  document.execCommand('insertText', false, text)
-}
+};
 
 const handleImageUpload = async (event) => {
-  const file = event.target.files[0]
-  if(!file) return
+  const file = event.target.files[0];
+  if (!file) return;
   try {
-    const imageUrl = await uploadImageToCloudinary(file, 'blog_featured');
-    article.value.featuredImageUrl = imageUrl;
+    const imageUrl = await uploadImageToCloudinary(file, "blog_featured");
+    article.value.coverImage = imageUrl;
   } catch (err) {
     await Swal.fire({
-      icon: 'error',
-      title: '儲存失敗',
-      text: '圖片上傳失敗，請稍後再試'
-    })
+      icon: "error",
+      title: "儲存失敗",
+      text: "圖片上傳失敗，請稍後再試",
+    });
   }
-  
-}
+};
 
 const removeImage = () => {
-  article.value.featuredImageUrl = ''
-}
-
+  article.value.coverImage = "";
+};
+const handleContentImagesUpload = async (e) => {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    const url = await uploadImageToCloudinary(file, "blog_content");
+    article.value.images.push({
+      url,
+      sort: article.value.images.length,
+    });
+  }
+};
+const removeContentImage = (index) => {
+  article.value.images.splice(index, 1);
+};
 const saveDraft = async () => {
   try {
-    isSaving.value = true
-    article.value.isPublished = false
-    await saveArticle()
+    isSaving.value = true;
+    article.value.isPublished = false;
+    await saveArticle();
     Swal.fire({
       toast: true,
-      icon: 'success',
-      title: '草稿已儲存',
+      icon: "success",
+      title: "草稿已儲存",
       timer: 1500,
       showConfirmButton: false,
-      position: 'top-end'
+      position: "top-end",
     }).then(() => {
-      router.push('/dashboard/blog')
+      router.push("/dashboard/blog");
     });
-
   } catch (error) {
-    console.log(error)
-    alert('儲存失敗')
+    console.log(error);
+    await Swal.fire("儲存失敗", "", "error");
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
-}
+};
 
 const publishArticle = async () => {
-  if (!article.value.title.trim()) {
-    alert('請輸入文章標題')
-    return
+  const errorMessage = validateArticleRequiredFields();
+  if (errorMessage) {
+    await Swal.fire("無法儲存草稿", errorMessage, "warning");
+    return;
   }
-
-  if (!article.value.category) {
-    alert('請選擇文章分類')
-    return
-  }
-
-  if (!article.value.content.trim()) {
-    alert('請輸入文章內容')
-    return
-  }
-
   try {
-    isSaving.value = true
-    article.value.isPublished = true
-    await saveArticle()
+    isSaving.value = true;
+    article.value.isPublished = true;
+    await saveArticle();
     Swal.fire({
       toast: true,
-      icon: 'success',
-      title: '文章已發布',
+      icon: "success",
+      title: "文章已發布",
       timer: 1500,
       showConfirmButton: false,
-      position: 'top-end'
+      position: "top-end",
     }).then(() => {
-      router.push('/dashboard/blog')
+      router.push("/dashboard/blog");
     });
   } catch (error) {
-
-    alert('發布失敗')
+    alert("發布失敗");
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
-}
+};
 
 const saveArticle = async () => {
-  // 自動產生 slug
-  if (!article.value.slug && article.value.title) {
-    article.value.slug = article.value.title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
+  const errorMessage = validateArticleRequiredFields();
+  if (errorMessage) {
+    await Swal.fire("無法儲存草稿", errorMessage, "warning");
+    return;
   }
-  const isEdit = route.params.id !== undefined;
-
-  if (isEdit) {
-    // 呼叫 PUT 更新
-    await apiPut(`/api/Blog/${route.params.id}`, article.value);
+  const payload = {
+    ...article.value,
+    imagesJson: JSON.stringify(article.value.images),
+  };
+  payload.category =
+    selectedCategory.value === "__custom__"
+      ? customCategory.value
+      : selectedCategory.value;
+  if (isEditing.value) {
+    await apiPut(`/api/Blog/${route.params.id}`, payload);
   } else {
-    // 呼叫 POST 新增
-    await apiPost('/api/Blog', article.value);
+    await apiPost("/api/Blog", payload);
   }
-}
+};
+const validateArticleRequiredFields = () => {
+  if (!article.value.title?.trim()) {
+    return "請輸入文章標題";
+  }
 
+  if (!article.value.date) {
+    return "請選擇發布時間";
+  }
 
-const getCategoryText = (categoryValue) => {
-  const option = categoryOptions.find(opt => opt.value === categoryValue)
-  return option ? `${option.icon} ${option.label}` : '未分類'
-}
+  if (!article.value.category?.trim()) {
+    return "請選擇文章分類";
+  }
 
-const toggleCategoryDropdown = () => {
-  categoryDropdownOpen.value = !categoryDropdownOpen.value
-}
+  if (!article.value.coverImage?.trim()) {
+    return "請上傳封面圖片";
+  }
 
-const selectCategory = (value) => {
-  article.value.category = value
-  categoryDropdownOpen.value = false
-}
+  // 去除 HTML tag 後再判斷內容
+  const plainText = article.value.content?.replace(/<[^>]*>/g, "").trim();
 
+  if (!plainText) {
+    return "請輸入文章內容";
+  }
+
+  return null; // ✅ 通過
+};
 </script>
 
 <style scoped>
@@ -452,7 +531,8 @@ const selectCategory = (value) => {
   gap: 12px;
 }
 
-.save-draft-btn, .publish-btn {
+.save-draft-btn,
+.publish-btn {
   padding: 12px 20px;
   border-radius: 6px;
   font-weight: 500;
@@ -482,7 +562,8 @@ const selectCategory = (value) => {
   background: #2c5aa0;
 }
 
-.save-draft-btn:disabled, .publish-btn:disabled {
+.save-draft-btn:disabled,
+.publish-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -561,7 +642,6 @@ const selectCategory = (value) => {
 .slug-input:focus {
   outline: none;
 }
-
 
 .char-count {
   text-align: right;
@@ -644,7 +724,8 @@ const selectCategory = (value) => {
   border: 2px solid #3182ce;
   border-top: none;
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   z-index: 1000;
   max-height: 300px;
   overflow-y: auto;
@@ -844,7 +925,7 @@ const selectCategory = (value) => {
   min-height: 400px;
   padding: 16px;
   border: none;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 14px;
   resize: vertical;
   box-sizing: border-box;
@@ -918,7 +999,8 @@ const selectCategory = (value) => {
   gap: 8px;
 }
 
-.preview-btn, .delete-btn {
+.preview-btn,
+.delete-btn {
   width: 100%;
   padding: 10px 16px;
   border-radius: 6px;
@@ -954,7 +1036,84 @@ const selectCategory = (value) => {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
 
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.custom-category-input {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.hash-prefix {
+  padding: 13.5px 13px;
+  background: #f2f2f2;
+  border: 1px solid #ccc;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  position: relative;
+  left: 5px;
+}
+
+.custom-category-input .text-input {
+  flex: 1;
+  border-radius: 0 4px 4px 0;
+}
+.multi-image-upload {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.multi-image-preview {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 163px;
+  max-height: 163px;
+  border-radius: 6px;
+  padding: 6px;
+  background: #fafafa;
+}
+
+.multi-image-preview img {
+  max-width: 163px;
+  max-height: 163px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.multi-image-preview .remove-image-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.checkbox-label {
+  font-size: 16px;
+}
+.checkbox-option input {
+  width: 16px;
+  height: 16px;
+}
 /* 響應式設計 */
 @media (max-width: 1024px) {
   .editor-container {
@@ -971,7 +1130,8 @@ const selectCategory = (value) => {
     justify-content: stretch;
   }
 
-  .save-draft-btn, .publish-btn {
+  .save-draft-btn,
+  .publish-btn {
     flex: 1;
   }
 }

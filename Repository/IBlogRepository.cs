@@ -9,4 +9,5 @@ public interface IBlogPostRepository
     Task<BlogPostDto?> GetByIdAsync(int id);
     Task UpdateAsync(BlogPostDto post);
     Task DeleteAsync(int id);
+    Task<bool> UpdatePublishStatusAsync(int id, bool isPublished);
 }

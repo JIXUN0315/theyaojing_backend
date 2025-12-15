@@ -95,7 +95,7 @@ import { apiPost, apiGet } from "../utils/api.js";
 import suneditor from "suneditor";
 import plugins from "suneditor/src/plugins";
 import "suneditor/dist/css/suneditor.min.css";
-
+import Swal from "sweetalert2";
 const route = useRoute();
 const router = useRouter();
 
@@ -107,7 +107,7 @@ const news = ref({
   content: "",
   imgUrl: "",
   isPublished: false,
-  date: new Date(),
+  date: dayjs().hour(12).toDate(),
 });
 
 const editorRef = ref(null);
@@ -145,6 +145,7 @@ onMounted(async () => {
       ["bold", "underline", "italic", "strike"],
       ["fontColor", "hiliteColor"],
       ["align", "list", "lineHeight"],
+       ["link"],  
       ["removeFormat"],
     ],
   });
@@ -185,7 +186,7 @@ async function loadNews() {
     news.value.date = res.date ?? null;
   } catch (err) {
     console.error(err);
-    alert("讀取消息失敗");
+    await Swal.fire("載入失敗", "無法取得文章資料", "error");
     router.push("/dashboard/news");
   }
 }
@@ -193,7 +194,7 @@ const handleImageUpload = async (event) => {
   const file = event.target.files?.[0];
   if (!file) return;
   if (!file.type.startsWith("image/")) {
-    alert("請選擇圖片檔案");
+     await Swal.fire("載入失敗", "請選擇圖片檔案", "error");
     return;
   }
 
@@ -223,7 +224,11 @@ const handleImageUpload = async (event) => {
     event.target.value = "";
   } catch (err) {
     console.error(err);
-    alert("圖片上傳失敗");
+    await Swal.fire({
+      icon: "error",
+      title: "儲存失敗",
+      text: "圖片上傳失敗，請稍後再試",
+    });
   } finally {
     isSaving.value = false;
   }
@@ -239,7 +244,16 @@ const edit = async (isPublished) => {
     await createNews(isPublished);
   }
   isSaving.value = false;
-  alert('編輯完成!')
+   Swal.fire({
+      toast: true,
+      icon: "success",
+      title: "編輯完成",
+      timer: 1500,
+      showConfirmButton: false,
+      position: "top-end",
+    }).then(() => {
+      router.push("/dashboard/blog");
+    });
   router.push("/dashboard/news");
 };
 const createNews = async (isPublished) => {

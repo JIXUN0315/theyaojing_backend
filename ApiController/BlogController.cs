@@ -66,4 +66,20 @@ public class BlogController : ControllerBase
         await _repository.DeleteAsync(id);
         return NoContent();
     }
+
+    [HttpGet("featured")]
+    public async Task<IActionResult> Featured() {
+        var post = await _repository.GetAllAsync();
+        post = post.Where(x => x.IsFeatured).OrderBy(x => x.Date).Take(3).ToList();
+        if(post == null)
+            return NotFound();
+
+        return Ok(post);
+    }
+    [HttpPost("{id}/publish")]
+    public async Task<IActionResult> UpdatePublishStatus(int id, [FromBody] PublishNewsReq req
+        ) {
+        var success = await _repository.UpdatePublishStatusAsync(id, req.IsPublished);
+        return Ok();
+    }
 }
