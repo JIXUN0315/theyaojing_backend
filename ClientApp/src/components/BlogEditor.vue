@@ -386,6 +386,11 @@ const removeContentImage = (index) => {
   article.value.images.splice(index, 1);
 };
 const saveDraft = async () => {
+  const errorMessage = validateArticleRequiredFields();
+  if (errorMessage) {
+    await Swal.fire("無法儲存草稿", errorMessage, "warning");
+    return;
+  }
   try {
     isSaving.value = true;
     article.value.isPublished = false;
