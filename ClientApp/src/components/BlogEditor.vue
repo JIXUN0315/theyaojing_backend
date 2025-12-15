@@ -224,8 +224,6 @@ const router = useRouter();
 
 const isEditing = computed(() => route.params.id !== undefined);
 const isSaving = ref(false);
-const isDeleting = ref(false);
-const showHtml = ref(false);
 const categoryDropdownOpen = ref(false);
 // radio 選到的值
 const selectedCategory = ref("");
@@ -466,7 +464,7 @@ const validateArticleRequiredFields = () => {
     return "請選擇發布時間";
   }
 
-  if (!article.value.category?.trim()) {
+  if (!selectedCategory.value?.trim()) {
     return "請選擇文章分類";
   }
 
