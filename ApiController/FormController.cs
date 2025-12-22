@@ -12,46 +12,44 @@ namespace Backend.ApiController;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FormController: ControllerBase
+public class FormController : ControllerBase
 {
     private readonly IFormRepository _formRepository;
     private readonly IEmailService _email;
+
     public FormController
-        (IFormRepository formRepository,
-            IEmailService email)
+    (IFormRepository formRepository,
+        IEmailService email)
     {
         _formRepository = formRepository;
         _email = email;
     }
-    
+
     [HttpPost("submit")]
     [EnableRateLimiting("FormSubmitPolicy")]
     public async Task<IActionResult> SubmitForm([FromBody] SubmitFormViewModel viewModel)
     {
-
-        var id = await _formRepository.InsertFormAsync( JsonSerializer.Serialize(viewModel));
+        var id = await _formRepository.InsertFormAsync(JsonSerializer.Serialize(viewModel));
         if (id != null)
         {
             await _email.SendAdminNotificationAsync(viewModel);
             return Ok(new { message = "Form submitted", id });
         }
+
         return BadRequest();
     }
-    
-    
-    
+
+
     [HttpGet]
     [Authorize]
-
     public async Task<IActionResult> GetAll()
     {
-        var list = (await _formRepository.GetAllAsync()).Select(x=> new FormListViewModel(x)).ToList();
+        var list = (await _formRepository.GetAllAsync()).Select(x => new FormListViewModel(x)).ToList();
         return Ok(list);
     }
-    
+
     [HttpGet("{id}")]
     [Authorize]
-
     public async Task<IActionResult> GetById(Guid id)
     {
         var detail = await _formRepository.GetByIdAsync(id);
@@ -59,7 +57,21 @@ public class FormController: ControllerBase
             return NotFound();
 
         var res = new FormViewModel(detail);
-     
+
+        return Ok(res);
+    }
+
+    [HttpPost("Query")]
+    [Authorize]
+    public async Task<IActionResult> Export(Guid[] ids)
+    {
+        var detail = await _formRepository.QueryAsync(ids);
+        if (detail == null)
+            return NotFound();
+
+        var res = detail.Select(x => new FormViewModel(x)).ToList();
+
+
         return Ok(res);
     }
 }
