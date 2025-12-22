@@ -270,7 +270,15 @@ const renderLastDaysChart = (days) => {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    }
     }
   })
 }
@@ -317,7 +325,15 @@ const renderYearChart = () => {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0 
+        }
+      }
+    }
     }
   })
 }
