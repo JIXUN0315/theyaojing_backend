@@ -17,8 +17,8 @@ public class FormViewModel
         this.DepartYear = dto.AnswersDto.DepartYear;
         this.Referral = dto.AnswersDto.Referral;
         this.OtherInfo = dto.AnswersDto.OtherInfo;
+        this.QuestionToResolve = dto.AnswersDto.QuestionToResolve;
         this.CreatedAt = dto.CreatedAt;
-
     }
     
     /// <summary>
@@ -75,6 +75,11 @@ public class FormViewModel
     /// 其他補充說明（可空白，用來填寫特殊狀況或需求）
     /// </summary>
     public string OtherInfo { get; set; } 
+    
+    /// <summary>
+    /// 主要想解決的問題
+    /// </summary>
+    public string[] QuestionToResolve { get; set; }
     
     /// <summary>
     /// 新增時間
