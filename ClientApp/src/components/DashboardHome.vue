@@ -157,7 +157,7 @@
 
 <script setup>
 import { ref, computed, onMounted,nextTick } from 'vue'
-import { apiGet } from '../utils/api.js'
+import { apiGet, apiPost } from '../utils/api.js'
 import { Chart } from 'chart.js/auto'
 
 // ===== 狀態 =====
@@ -187,9 +187,87 @@ onMounted(() => {
 
 // ===== API =====
 const exportFile = async () => {
-  let ids = selectedItems.value;
-  selectedItems.value = [];
+  try {
+    const ids = [...selectedItems.value]
+    if (ids.length === 0) {
+      alert('請先勾選要匯出的資料')
+      return
+    }
+
+    selectedItems.value = []
+    const data = await apiPost('/api/Form/query', ids)
+
+    // ===== CSV Header =====
+    const headers = [
+      '中文全名',
+      '電子郵件',
+      '電話 或 LINE ID',
+      '畢業(就讀)學校',
+      '畢業(就讀)科系',
+      '想去哪個國家',
+      '想了解的課程類別',
+      '欲就讀的科系',
+      '如何得知曜境',
+      '您最想解決的問題是什麼',
+      '預計哪一年出發就讀',
+      '諮詢方式',
+      '其他資訊',
+      '建立時間'
+    ]
+
+    // ===== CSV Rows =====
+    const rows = data.map(item => [
+      item.fullName,
+      item.email,
+      item.phoneOrLine,
+      item.school,
+      item.department,
+      item.targetCountry,
+      item.programType,
+      Array.isArray(item.intendedMajor)
+        ? item.intendedMajor.join(', ')
+        : '',
+      item.questionToResolve,
+      item.departYear,
+      item.referral,
+      item.otherInfo,
+      formatDate(item.createdAt)
+    ])
+
+    // ===== 組成 CSV 文字（處理逗號、換行、引號）=====
+    const escapeCSV = (value) => {
+      if (value === null || value === undefined) return ''
+      const str = String(value)
+      if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    }
+
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map(row => row.map(escapeCSV).join(','))
+    ].join('\n')
+
+    // ===== 下載（Excel 也能直接開）=====
+    const blob = new Blob(
+      ['\uFEFF' + csvContent], // BOM：避免中文亂碼
+      { type: 'text/csv;charset=utf-8;' }
+    )
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `曜境填寫表單_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+
+  } catch (err) {
+    console.error('匯出 CSV 失敗', err)
+    alert('匯出失敗，請稍後再試')
+  }
 }
+
 const loadDashboardData = async () => {
   try {
     loading.value = true
