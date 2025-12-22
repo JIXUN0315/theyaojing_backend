@@ -42,6 +42,19 @@ public class FormRepository: IFormRepository
         return await _db.QueryAsync<FormListItemDto>(sql);
     }
 
+    public Task<IEnumerable<FormDetailDto>> QueryAsync(Guid[] ids)
+    {
+        const string sql = @"
+            SELECT
+                id,
+                created_at AS CreatedAt,
+                answers::text AS Answers
+            FROM form_responses
+            WHERE id = ANY(@Ids);
+        ";
+        return _db.QueryAsync<FormDetailDto>(sql, new { Ids = ids });
+    }
+
     public async Task<FormDetailDto?> GetByIdAsync(Guid id)
     {
         const string sql = @"
