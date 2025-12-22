@@ -75,6 +75,13 @@
     <div class="recent-section">
       <div class="section-header">
         <h3 class="section-title">提交的表單</h3>
+        <div class="title-area">
+          <div class="title-selectAll">
+            <label for="all">全選</label>
+            <input type="checkbox" id="all" class="checkbox" v-model="isAllSelected">
+          </div>
+          <button class="export" @click="exportFile">匯出</button>
+        </div>
       </div>
 
       <div class="recent-forms">
@@ -89,10 +96,11 @@
 
         <div v-else class="forms-table">
           <div class="table-header">
+            <div class="header-cell"></div>
             <div class="header-cell">姓名</div>
             <div class="header-cell">Email</div>
             <div class="header-cell">提交時間</div>
-            <div class="header-cell">操作</div>
+            <div class="table-cell-center">操作</div>
           </div>
 
           <div
@@ -100,10 +108,13 @@
               :key="form.id"
               class="table-row"
           >
+            <div class="table-cell-center">
+              <input type="checkbox" class="checkbox" :value="form.id" v-model="selectedItems">
+            </div>
             <div class="table-cell">{{ form.fullName }}</div>
             <div class="table-cell">{{ form.email }}</div>
             <div class="table-cell">{{ formatDate(form.createdAt) }}</div>
-            <div class="table-cell">
+            <div class="table-cell-center">
               <router-link
                   :to="`/dashboard/forms/${form.id}`"
                   class="view-btn"
@@ -160,7 +171,7 @@ const stats = ref({
 })
 
 const allForms = ref([])
-
+const selectedItems = ref([]);
 // 分頁設定
 const pageSize = 10
 const currentPage = ref(1)
@@ -175,6 +186,10 @@ onMounted(() => {
 })
 
 // ===== API =====
+const exportFile = async () => {
+  let ids = selectedItems.value;
+  selectedItems.value = [];
+}
 const loadDashboardData = async () => {
   try {
     loading.value = true
@@ -282,7 +297,19 @@ const renderLastDaysChart = (days) => {
     }
   })
 }
-
+const isAllSelected = computed({
+  get() {
+    return pagedForms.value.length > 0 &&
+      pagedForms.value.every(f => selectedItems.value.includes(f.id))
+  },
+  set(val) {
+    if (val) {
+      selectedItems.value = pagedForms.value.map(f => f.id)
+    } else {
+      selectedItems.value = []
+    }
+  }
+})
 const renderYearChart = () => {
   if (dailyChartInstance) {
     dailyChartInstance.destroy()
@@ -403,8 +430,31 @@ const formatDate = (dateString) => {
 .section-header {
   padding: 24px;
   border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-
+.title-area{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.title-selectAll label{
+  margin-right: 6px;
+}
+.title-selectAll{
+    display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.export{
+      font-size: 16px;
+    background: #3182ce;
+    color: #FFF;
+    border: 0;
+    padding: 6px 16px;
+    margin-left: 40px;
+}
 .recent-forms {
   padding: 24px;
 }
@@ -416,10 +466,16 @@ const formatDate = (dateString) => {
 .table-header,
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: 1fr 3fr 3fr 3fr 1fr;
   gap: 16px;
 }
-
+.table-cell-center{
+  text-align: center;
+}
+.checkbox{
+      width: 20px;
+    height: 20px;
+}
 .table-header {
   font-weight: 600;
   border-bottom: 1px solid #e2e8f0;
