@@ -19,6 +19,7 @@ public class FormViewModel
         this.OtherInfo = dto.AnswersDto.OtherInfo;
         this.QuestionToResolve = dto.AnswersDto.QuestionToResolve;
         this.CreatedAt = dto.CreatedAt;
+        this.AskType = dto.AnswersDto.AskType;
     }
     
     /// <summary>
@@ -85,4 +86,9 @@ public class FormViewModel
     /// 新增時間
     /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// 諮詢方式
+    /// </summary>
+    public string AskType {  get; set; }
 }

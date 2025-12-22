@@ -112,4 +112,9 @@ public class AnswersDto
     /// 想解決的問題
     /// </summary>
     public string[] QuestionToResolve { get; set; }
+
+    /// <summary>
+    /// 諮詢方式
+    /// </summary>
+    public string AskType {  get; set; }
 }

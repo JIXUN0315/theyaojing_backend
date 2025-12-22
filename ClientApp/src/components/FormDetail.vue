@@ -13,7 +13,9 @@
       <p>{{ error }}</p>
       <div class="error-actions">
         <button @click="loadForm" class="retry-btn">重新載入</button>
-        <router-link to="/dashboard/forms" class="back-btn">返回列表</router-link>
+        <router-link to="/dashboard/forms" class="back-btn"
+          >返回列表</router-link
+        >
       </div>
     </div>
 
@@ -55,7 +57,7 @@
 
           <div class="info-item">
             <label class="info-label">聯絡方式</label>
-            <div class="info-value">{{ form.phoneOrLine || '未提供' }}</div>
+            <div class="info-value">{{ form.phoneOrLine || "未提供" }}</div>
           </div>
         </div>
       </div>
@@ -69,12 +71,12 @@
         <div class="info-grid">
           <div class="info-item">
             <label class="info-label">學校</label>
-            <div class="info-value">{{ form.school || '未提供' }}</div>
+            <div class="info-value">{{ form.school || "未提供" }}</div>
           </div>
 
           <div class="info-item">
             <label class="info-label">科系</label>
-            <div class="info-value">{{ form.department || '未提供' }}</div>
+            <div class="info-value">{{ form.department || "未提供" }}</div>
           </div>
         </div>
       </div>
@@ -89,23 +91,25 @@
           <div class="info-item">
             <label class="info-label">目標國家</label>
             <div class="info-value">
-              <span class="country-tag">{{ form.targetCountry || '未提供' }}</span>
+              <span class="country-tag">{{
+                form.targetCountry || "未提供"
+              }}</span>
             </div>
           </div>
 
           <div class="info-item">
             <label class="info-label">課程類型</label>
-            <div class="info-value">{{ form.programType || '未提供' }}</div>
+            <div class="info-value">{{ form.programType || "未提供" }}</div>
           </div>
 
           <div class="info-item">
             <label class="info-label">希望專業</label>
-            <div class="info-value">{{ form.intendedMajor || '未提供' }}</div>
+            <div class="info-value">{{ form.intendedMajor || "未提供" }}</div>
           </div>
 
           <div class="info-item">
             <label class="info-label">預計出發年份</label>
-            <div class="info-value">{{ form.departYear || '未提供' }}</div>
+            <div class="info-value">{{ form.departYear || "未提供" }}</div>
           </div>
         </div>
       </div>
@@ -117,9 +121,17 @@
         </div>
 
         <div class="info-grid">
-          <div class="info-item full-width">
+          <div class="info-item">
             <label class="info-label">得知來源</label>
-            <div class="info-value">{{ form.referral || '未提供' }}</div>
+            <div class="info-value">{{ form.referral || "未提供" }}</div>
+          </div>
+           <div class="info-item">
+            <label class="info-label">諮詢方式</label>
+            <div class="info-value">{{ form.askType || "未提供" }}</div>
+          </div>
+           <div class="info-item">
+            <label class="info-label">最想解決的問題</label>
+            <div class="info-value">{{ form.questionToResolve || "未提供" }}</div>
           </div>
 
           <div class="info-item full-width" v-if="form.otherInfo">
@@ -135,104 +147,108 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { apiGet } from '../utils/api.js'
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { apiGet } from "../utils/api.js";
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-const loading = ref(true)
-const error = ref('')
-const form = ref(null)
-const isDeleting = ref(false)
+const loading = ref(true);
+const error = ref("");
+const form = ref(null);
+const isDeleting = ref(false);
 
 onMounted(async () => {
-  await loadForm()
-})
+  await loadForm();
+});
 
 const loadForm = async () => {
   try {
-    loading.value = true
-    error.value = ''
+    loading.value = true;
+    error.value = "";
 
-    const formId = route.params.id
-    form.value = await apiGet(`/api/Form/${formId}`)
+    const formId = route.params.id;
+    form.value = await apiGet(`/api/Form/${formId}`);
   } catch (err) {
-    error.value = err.message || '載入表單資料時發生錯誤'
-    console.error('Failed to load form:', err)
+    error.value = err.message || "載入表單資料時發生錯誤";
+    console.error("Failed to load form:", err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
-}
+  const date = new Date(dateString);
+  return date.toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
 
 const exportForm = () => {
-  if (!form.value) return
+  if (!form.value) return;
 
   // 建立要匯出的資料
   const exportData = {
-    '姓名': form.value.fullName,
-    'Email': form.value.email,
-    '聯絡方式': form.value.phoneOrLine || '未提供',
-    '學校': form.value.school || '未提供',
-    '科系': form.value.department || '未提供',
-    '目標國家': form.value.targetCountry || '未提供',
-    '課程類型': form.value.programType || '未提供',
-    '希望專業': form.value.intendedMajor || '未提供',
-    '預計出發年份': form.value.departYear || '未提供',
-    '得知來源': form.value.referral || '未提供',
-    '補充說明': form.value.otherInfo || '未提供',
-    '提交時間': formatDate(form.value.createdAt)
-  }
+    姓名: form.value.fullName,
+    Email: form.value.email,
+    聯絡方式: form.value.phoneOrLine || "未提供",
+    學校: form.value.school || "未提供",
+    科系: form.value.department || "未提供",
+    目標國家: form.value.targetCountry || "未提供",
+    課程類型: form.value.programType || "未提供",
+    希望專業: form.value.intendedMajor || "未提供",
+    預計出發年份: form.value.departYear || "未提供",
+    得知來源: form.value.referral || "未提供",
+    補充說明: form.value.otherInfo || "未提供",
+    提交時間: formatDate(form.value.createdAt),
+  };
 
   // 轉換為 JSON 字串並建立下載
-  const dataStr = JSON.stringify(exportData, null, 2)
-  const dataBlob = new Blob([dataStr], { type: 'application/json' })
+  const dataStr = JSON.stringify(exportData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: "application/json" });
 
-  const url = URL.createObjectURL(dataBlob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `表單_${form.value.fullName}_${new Date().toISOString().split('T')[0]}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `表單_${form.value.fullName}_${
+    new Date().toISOString().split("T")[0]
+  }.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 const deleteForm = async () => {
-  if (!form.value || isDeleting.value) return
+  if (!form.value || isDeleting.value) return;
 
-  const confirmed = confirm(`確定要刪除 ${form.value.fullName} 的表單嗎？此操作無法復原。`)
-  if (!confirmed) return
+  const confirmed = confirm(
+    `確定要刪除 ${form.value.fullName} 的表單嗎？此操作無法復原。`
+  );
+  if (!confirmed) return;
 
   try {
-    isDeleting.value = true
+    isDeleting.value = true;
 
     // 這裡需要實作刪除 API
     // await apiDelete(`/api/Form/${route.params.id}`)
 
     // 暫時模擬刪除成功
-    alert('表單已刪除')
-    router.push('/dashboard/forms')
+    alert("表單已刪除");
+    router.push("/dashboard/forms");
   } catch (err) {
-    alert('刪除失敗：' + (err.message || '未知錯誤'))
-    console.error('Delete failed:', err)
+    alert("刪除失敗：" + (err.message || "未知錯誤"));
+    console.error("Delete failed:", err);
   } finally {
-    isDeleting.value = false
+    isDeleting.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -257,7 +273,9 @@ const deleteForm = async () => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -287,7 +305,8 @@ const deleteForm = async () => {
   gap: 12px;
 }
 
-.retry-btn, .back-btn {
+.retry-btn,
+.back-btn {
   padding: 10px 20px;
   border-radius: 6px;
   text-decoration: none;
@@ -361,7 +380,8 @@ const deleteForm = async () => {
   gap: 12px;
 }
 
-.export-btn, .delete-btn {
+.export-btn,
+.delete-btn {
   padding: 10px 16px;
   border-radius: 6px;
   font-size: 14px;
@@ -496,7 +516,8 @@ const deleteForm = async () => {
     justify-content: stretch;
   }
 
-  .export-btn, .delete-btn {
+  .export-btn,
+  .delete-btn {
     flex: 1;
   }
 

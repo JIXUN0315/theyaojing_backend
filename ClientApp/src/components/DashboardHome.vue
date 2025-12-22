@@ -48,20 +48,20 @@
 
           <div class="chart-tabs">
             <button
-                :class="{ active: chartMode === '7d' }"
-                @click="switchChart('7d')"
+              :class="{ active: chartMode === '7d' }"
+              @click="switchChart('7d')"
             >
               近 7 天
             </button>
             <button
-                :class="{ active: chartMode === '30d' }"
-                @click="switchChart('30d')"
+              :class="{ active: chartMode === '30d' }"
+              @click="switchChart('30d')"
             >
               一個月內
             </button>
             <button
-                :class="{ active: chartMode === 'year' }"
-                @click="switchChart('year')"
+              :class="{ active: chartMode === 'year' }"
+              @click="switchChart('year')"
             >
               年度
             </button>
@@ -78,16 +78,19 @@
         <div class="title-area">
           <div class="title-selectAll">
             <label for="all">全選</label>
-            <input type="checkbox" id="all" class="checkbox" v-model="isAllSelected">
+            <input
+              type="checkbox"
+              id="all"
+              class="checkbox"
+              v-model="isAllSelected"
+            />
           </div>
           <button class="export" @click="exportFile">匯出</button>
         </div>
       </div>
 
       <div class="recent-forms">
-        <div v-if="loading" class="loading">
-          載入中...
-        </div>
+        <div v-if="loading" class="loading">載入中...</div>
 
         <div v-else-if="pagedForms.length === 0" class="empty-state">
           <div class="empty-icon">📄</div>
@@ -103,22 +106,20 @@
             <div class="table-cell-center">操作</div>
           </div>
 
-          <div
-              v-for="form in pagedForms"
-              :key="form.id"
-              class="table-row"
-          >
+          <div v-for="form in pagedForms" :key="form.id" class="table-row">
             <div class="table-cell-center">
-              <input type="checkbox" class="checkbox" :value="form.id" v-model="selectedItems">
+              <input
+                type="checkbox"
+                class="checkbox"
+                :value="form.id"
+                v-model="selectedItems"
+              />
             </div>
             <div class="table-cell">{{ form.fullName }}</div>
             <div class="table-cell">{{ form.email }}</div>
             <div class="table-cell">{{ formatDate(form.createdAt) }}</div>
             <div class="table-cell-center">
-              <router-link
-                  :to="`/dashboard/forms/${form.id}`"
-                  class="view-btn"
-              >
+              <router-link :to="`/dashboard/forms/${form.id}`" class="view-btn">
                 查看
               </router-link>
             </div>
@@ -126,25 +127,22 @@
 
           <!-- 分頁 -->
           <div class="pagination">
-            <button
-                :disabled="currentPage === 1"
-                @click="currentPage--"
-            >
+            <button :disabled="currentPage === 1" @click="currentPage--">
               上一頁
             </button>
 
             <button
-                v-for="page in totalPages"
-                :key="page"
-                :class="{ active: page === currentPage }"
-                @click="currentPage = page"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: page === currentPage }"
+              @click="currentPage = page"
             >
               {{ page }}
             </button>
 
             <button
-                :disabled="currentPage === totalPages"
-                @click="currentPage++"
+              :disabled="currentPage === totalPages"
+              @click="currentPage++"
             >
               下一頁
             </button>
@@ -156,308 +154,301 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted,nextTick } from 'vue'
-import { apiGet, apiPost } from '../utils/api.js'
-import { Chart } from 'chart.js/auto'
+import { ref, computed, onMounted, nextTick } from "vue";
+import { apiGet, apiPost } from "../utils/api.js";
+import { Chart } from "chart.js/auto";
 
 // ===== 狀態 =====
-const loading = ref(true)
+const loading = ref(true);
 
 const stats = ref({
   totalForms: 0,
   todayForms: 0,
   weekForms: 0,
-  monthForms: 0
-})
+  monthForms: 0,
+});
 
-const allForms = ref([])
+const allForms = ref([]);
 const selectedItems = ref([]);
 // 分頁設定
-const pageSize = 10
-const currentPage = ref(1)
+const pageSize = 10;
+const currentPage = ref(1);
 
-const dailyChart = ref(null)
-const chartMode = ref('7d') // '7d' | '30d' | 'year'
-let dailyChartInstance = null
+const dailyChart = ref(null);
+const chartMode = ref("7d"); // '7d' | '30d' | 'year'
+let dailyChartInstance = null;
 
 // ===== 生命週期 =====
 onMounted(() => {
-  loadDashboardData()
-})
+  loadDashboardData();
+});
 
 // ===== API =====
 const exportFile = async () => {
   try {
-    const ids = [...selectedItems.value]
+    const ids = [...selectedItems.value];
     if (ids.length === 0) {
-      alert('請先勾選要匯出的資料')
-      return
+      alert("請先勾選要匯出的資料");
+      return;
     }
 
-    selectedItems.value = []
-    const data = await apiPost('/api/Form/query', ids)
+    selectedItems.value = [];
+    const data = await apiPost("/api/Form/query", ids);
 
     // ===== CSV Header =====
     const headers = [
-      '中文全名',
-      '電子郵件',
-      '電話 或 LINE ID',
-      '畢業(就讀)學校',
-      '畢業(就讀)科系',
-      '想去哪個國家',
-      '想了解的課程類別',
-      '欲就讀的科系',
-      '如何得知曜境',
-      '您最想解決的問題是什麼',
-      '預計哪一年出發就讀',
-      '諮詢方式',
-      '其他資訊',
-      '建立時間'
-    ]
-
+      "中文全名",
+      "電子郵件",
+      "電話 或 LINE ID",
+      "畢業(就讀)學校",
+      "畢業(就讀)科系",
+      "想去哪個國家",
+      "想了解的課程類別",
+      "欲就讀的科系",
+      "如何得知曜境",
+      "您最想解決的問題是什麼",
+      "預計哪一年出發就讀",
+      "諮詢方式",
+      "其他資訊",
+      "建立時間",
+    ];
+    debugger
     // ===== CSV Rows =====
-    const rows = data.map(item => [
-      item.fullName,
-      item.email,
-      item.phoneOrLine,
-      item.school,
-      item.department,
-      item.targetCountry,
-      item.programType,
-      Array.isArray(item.intendedMajor)
-        ? item.intendedMajor.join(', ')
-        : '',
-      item.questionToResolve,
-      item.departYear,
-      item.referral,
-      item.otherInfo,
-      formatDate(item.createdAt)
-    ])
+    const rows = data.map((item) => [
+      item.fullName, // 中文全名
+      item.email, // 電子郵件
+      item.phoneOrLine, // 電話 / LINE
+      item.school, // 學校
+      item.department, // 科系
+      item.targetCountry, // 想去哪個國家
+      item.programType, // 課程類別
+      Array.isArray(item.intendedMajor) ? item.intendedMajor.join(", ") : "", // 欲就讀的科系
+      item.referral, // 如何得知曜境
+      item.questionToResolve, // 最想解決的問題
+      item.departYear, // 出發年
+      item.askType, // 諮詢方式
+      item.otherInfo, // 其他資訊
+      formatDate(item.createdAt), // 建立時間
+    ]);
 
     // ===== 組成 CSV 文字（處理逗號、換行、引號）=====
     const escapeCSV = (value) => {
-      if (value === null || value === undefined) return ''
-      const str = String(value)
-      if (str.includes('"') || str.includes(',') || str.includes('\n')) {
-        return `"${str.replace(/"/g, '""')}"`
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
       }
-      return str
-    }
+      return str;
+    };
 
     const csvContent = [
-      headers.map(escapeCSV).join(','),
-      ...rows.map(row => row.map(escapeCSV).join(','))
-    ].join('\n')
+      headers.map(escapeCSV).join(","),
+      ...rows.map((row) => row.map(escapeCSV).join(",")),
+    ].join("\n");
 
     // ===== 下載（Excel 也能直接開）=====
     const blob = new Blob(
-      ['\uFEFF' + csvContent], // BOM：避免中文亂碼
-      { type: 'text/csv;charset=utf-8;' }
-    )
+      ["\uFEFF" + csvContent], // BOM：避免中文亂碼
+      { type: "text/csv;charset=utf-8;" }
+    );
 
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `曜境填寫表單_${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `曜境填寫表單_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   } catch (err) {
-    console.error('匯出 CSV 失敗', err)
-    alert('匯出失敗，請稍後再試')
+    console.error("匯出 CSV 失敗", err);
+    alert("匯出失敗，請稍後再試");
   }
-}
+};
 
 const loadDashboardData = async () => {
   try {
-    loading.value = true
+    loading.value = true;
 
-    const forms = await apiGet('/api/Form')
-    allForms.value = forms
+    const forms = await apiGet("/api/Form");
+    allForms.value = forms;
 
     // === 統計 ===
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     stats.value = {
       totalForms: forms.length,
-      todayForms: forms.filter(f => new Date(f.createdAt) >= today).length,
-      weekForms: forms.filter(f => new Date(f.createdAt) >= weekAgo).length,
-      monthForms: forms.filter(f => new Date(f.createdAt) >= monthAgo).length
-    }
-    await nextTick()
-    renderCharts()
+      todayForms: forms.filter((f) => new Date(f.createdAt) >= today).length,
+      weekForms: forms.filter((f) => new Date(f.createdAt) >= weekAgo).length,
+      monthForms: forms.filter((f) => new Date(f.createdAt) >= monthAgo).length,
+    };
+    await nextTick();
+    renderCharts();
   } catch (err) {
-    console.error('載入 Dashboard 失敗', err)
+    console.error("載入 Dashboard 失敗", err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // ===== computed =====
-const totalPages = computed(() =>
-    Math.ceil(allForms.value.length / pageSize)
-)
+const totalPages = computed(() => Math.ceil(allForms.value.length / pageSize));
 
 const switchChart = async (mode) => {
-  chartMode.value = mode
-  await nextTick()
-  renderCharts()
-}
-
-
+  chartMode.value = mode;
+  await nextTick();
+  renderCharts();
+};
 
 const renderCharts = () => {
-  if (chartMode.value === '7d') {
-    renderLastDaysChart(7)
-  } else if (chartMode.value === '30d') {
-    renderLastDaysChart(30)
-  } else if (chartMode.value === 'year') {
-    renderYearChart()
+  if (chartMode.value === "7d") {
+    renderLastDaysChart(7);
+  } else if (chartMode.value === "30d") {
+    renderLastDaysChart(30);
+  } else if (chartMode.value === "year") {
+    renderYearChart();
   }
-}
+};
 
 const renderLastDaysChart = (days) => {
   if (dailyChartInstance) {
-    dailyChartInstance.destroy()
+    dailyChartInstance.destroy();
   }
 
-  const today = new Date()
-  const labels = []
-  const data = []
+  const today = new Date();
+  const labels = [];
+  const data = [];
 
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today)
-    d.setDate(today.getDate() - i)
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
 
-    labels.push(`${d.getMonth() + 1}/${d.getDate()}`)
+    labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
 
-    const count = allForms.value.filter(f => {
-      const created = new Date(f.createdAt)
+    const count = allForms.value.filter((f) => {
+      const created = new Date(f.createdAt);
       return (
-          created.getFullYear() === d.getFullYear() &&
-          created.getMonth() === d.getMonth() &&
-          created.getDate() === d.getDate()
-      )
-    }).length
+        created.getFullYear() === d.getFullYear() &&
+        created.getMonth() === d.getMonth() &&
+        created.getDate() === d.getDate()
+      );
+    }).length;
 
-    data.push(count)
+    data.push(count);
   }
 
   dailyChartInstance = new Chart(dailyChart.value, {
-    type: 'line',
+    type: "line",
     data: {
       labels,
       datasets: [
         {
-          label: '新增表單數',
+          label: "新增表單數",
           data,
-          borderColor: '#3182ce',
-          backgroundColor: 'rgba(49,130,206,0.2)',
+          borderColor: "#3182ce",
+          backgroundColor: "rgba(49,130,206,0.2)",
           tension: 0.3,
-          fill: true
-        }
-      ]
+          fill: true,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          precision: 0
-        }
-      }
-    }
-    }
-  })
-}
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0,
+          },
+        },
+      },
+    },
+  });
+};
 const isAllSelected = computed({
   get() {
-    return pagedForms.value.length > 0 &&
-      pagedForms.value.every(f => selectedItems.value.includes(f.id))
+    return (
+      pagedForms.value.length > 0 &&
+      pagedForms.value.every((f) => selectedItems.value.includes(f.id))
+    );
   },
   set(val) {
     if (val) {
-      selectedItems.value = pagedForms.value.map(f => f.id)
+      selectedItems.value = pagedForms.value.map((f) => f.id);
     } else {
-      selectedItems.value = []
+      selectedItems.value = [];
     }
-  }
-})
+  },
+});
 const renderYearChart = () => {
   if (dailyChartInstance) {
-    dailyChartInstance.destroy()
+    dailyChartInstance.destroy();
   }
 
-  const now = new Date()
-  const year = now.getFullYear()
+  const now = new Date();
+  const year = now.getFullYear();
 
-  const labels = []
-  const data = []
+  const labels = [];
+  const data = [];
 
   for (let month = 0; month < 12; month++) {
-    labels.push(`${month + 1} 月`)
+    labels.push(`${month + 1} 月`);
 
-    const count = allForms.value.filter(f => {
-      const created = new Date(f.createdAt)
-      return (
-          created.getFullYear() === year &&
-          created.getMonth() === month
-      )
-    }).length
+    const count = allForms.value.filter((f) => {
+      const created = new Date(f.createdAt);
+      return created.getFullYear() === year && created.getMonth() === month;
+    }).length;
 
-    data.push(count)
+    data.push(count);
   }
 
   dailyChartInstance = new Chart(dailyChart.value, {
-    type: 'line',
+    type: "line",
     data: {
       labels,
       datasets: [
         {
           label: `${year} 年每月新增表單`,
           data,
-          borderColor: '#38a169',
-          backgroundColor: 'rgba(56,161,105,0.2)',
+          borderColor: "#38a169",
+          backgroundColor: "rgba(56,161,105,0.2)",
           tension: 0.3,
-          fill: true
-        }
-      ]
+          fill: true,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          precision: 0 
-        }
-      }
-    }
-    }
-  })
-}
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0,
+          },
+        },
+      },
+    },
+  });
+};
 const pagedForms = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return allForms.value.slice(start, start + pageSize)
-})
+  const start = (currentPage.value - 1) * pageSize;
+  return allForms.value.slice(start, start + pageSize);
+});
 
 // ===== utils =====
 const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
+  const date = new Date(dateString);
+  return date.toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 </script>
 
 <style scoped>
@@ -512,26 +503,26 @@ const formatDate = (dateString) => {
   justify-content: space-between;
   align-items: center;
 }
-.title-area{
+.title-area {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.title-selectAll label{
+.title-selectAll label {
   margin-right: 6px;
 }
-.title-selectAll{
-    display: flex;
+.title-selectAll {
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.export{
-      font-size: 16px;
-    background: #3182ce;
-    color: #FFF;
-    border: 0;
-    padding: 6px 16px;
-    margin-left: 40px;
+.export {
+  font-size: 16px;
+  background: #3182ce;
+  color: #fff;
+  border: 0;
+  padding: 6px 16px;
+  margin-left: 40px;
 }
 .recent-forms {
   padding: 24px;
@@ -547,12 +538,12 @@ const formatDate = (dateString) => {
   grid-template-columns: 1fr 3fr 3fr 3fr 1fr;
   gap: 16px;
 }
-.table-cell-center{
+.table-cell-center {
   text-align: center;
 }
-.checkbox{
-      width: 20px;
-    height: 20px;
+.checkbox {
+  width: 20px;
+  height: 20px;
 }
 .table-header {
   font-weight: 600;
