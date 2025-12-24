@@ -371,7 +371,6 @@ const updateNews = async (isPublished) => {
 
 .editor-container {
   display: grid;
-  grid-template-columns: 1fr 320px;
   gap: 32px;
 }
 
